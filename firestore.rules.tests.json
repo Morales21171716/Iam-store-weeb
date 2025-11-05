@@ -1,0 +1,99 @@
+{
+  "testSuite": {
+    "testCases": [
+      {
+        "expectation": "ALLOW",
+        "request": {
+          "auth": {"uid": "user1"},
+          "path": "/databases/(default)/documents/users/user1",
+          "method": "get"
+        },
+        "description": "A user should be able to read their own document."
+      },
+      {
+        "expectation": "DENY",
+        "request": {
+          "auth": {"uid": "user1"},
+          "path": "/databases/(default)/documents/users/user2",
+          "method": "get"
+        },
+        "description": "A user should not be able to read another user's document."
+      },
+      {
+        "expectation": "DENY",
+        "request": {
+          "auth": {"uid": "user1"},
+          "path": "/databases/(default)/documents/users/user1",
+          "method": "create"
+        },
+        "description": "A user should not be able to create their own document without a rule."
+      },
+      {
+        "expectation": "DENY",
+        "request": {
+          "auth": {"uid": "user1"},
+          "path": "/databases/(default)/documents/users/user2",
+          "method": "update"
+        },
+        "description": "A user should not be able to update another user's document."
+      },
+      {
+        "expectation": "ALLOW",
+        "request": {
+          "auth": {"uid": "account1"},
+          "path": "/databases/(default)/documents/licenses/account1",
+          "method": "get"
+        },
+        "description": "A user should be able to read a license if their UID matches the accountId."
+      },
+      {
+        "expectation": "ALLOW",
+        "request": {
+          "auth": {"uid": "userWithAccount"},
+          "path": "/databases/(default)/documents/licenses/account2",
+          "method": "get"
+        },
+        "database": [
+          {
+            "path": "/databases/(default)/documents/users/userWithAccount",
+            "data": {"accountId": "account2"}
+          }
+        ],
+        "description": "A user should be able to read a license if their user document has the correct accountId."
+      },
+      {
+        "expectation": "DENY",
+        "request": {
+          "auth": {"uid": "userWithoutAccount"},
+          "path": "/databases/(default)/documents/licenses/account1",
+          "method": "get"
+        },
+        "description": "A user should not be able to read a license if they don't own it and have no user document."
+      },
+      {
+        "expectation": "DENY",
+        "request": {
+          "auth": {"uid": "userWithWrongAccount"},
+          "path": "/databases/(default)/documents/licenses/account3",
+          "method": "get"
+        },
+        "database": [
+          {
+            "path": "/databases/(default)/documents/users/userWithWrongAccount",
+            "data": {"accountId": "wrongAccount"}
+          }
+        ],
+        "description": "A user should not be able to read a license if their user document has a different accountId."
+      },
+      {
+        "expectation": "DENY",
+        "request": {
+          "auth": {"uid": "user1"},
+          "path": "/databases/(default)/documents/licenses/account1",
+          "method": "create"
+        },
+        "description": "A user should not be able to create a license document."
+      }
+    ]
+  }
+}
